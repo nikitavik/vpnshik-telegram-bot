@@ -5,7 +5,7 @@ import sys
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 
-from handlers import get_id, report_status
+from handlers import get_id, report_status, get_config
 from services.ssh_server import SSHServer
 from infrastructure.config import BOT_TOKEN, LOG_LEVEL, SERVER_IP, SERVER_USERNAME, SERVER_PASSWORD
 
@@ -38,6 +38,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         /start - Welcome message
         /help - Show this help
         /status - Check server status
+        /config - Get VPN config as QR code
     """
     await update.message.reply_text(help_text)
 
@@ -72,8 +73,7 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("status", lambda update, context: report_status(update, context, ssh_server_instance)))
-
-
+    application.add_handler(CommandHandler("config", lambda update, context: get_config(update, context, ssh_server_instance)))
 
     application.add_handler(CommandHandler("id", get_id))
     # on non command i.e message - echo the message on Telegram

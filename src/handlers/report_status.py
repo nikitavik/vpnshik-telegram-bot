@@ -7,30 +7,45 @@ from .restricted_handler import restricted
 @restricted
 async def report_status(update: Update, context: ContextTypes.DEFAULT_TYPE, ssh_server=None):
     """
-    Check server status via SSH connection.
+    Check server status with essential VPN metrics.
     """
     if not ssh_server or not ssh_server.is_connected():
         await update.message.reply_text("❌ Server connection not available")
         return
 
     try:
-        # Check system load
-        load_output = ssh_server.exec_command("uptime")
-        load_line = load_output.strip().split()[-3:]
+        # Get daily bandwidth usage
+        try:
+            # Try to get default interface and check vnstat
+            interface_cmd = ssh_server.exec_command("ip route | grep default | awk '{print $5}' | head -1")
+            default_interface = interface_cmd.strip()
 
-        # Check disk usage
-        disk_output = ssh_server.exec_command("df -h / | tail -1")
-        disk_usage = disk_output.strip().split()
+            if default_interface:
+                bandwidth = ssh_server.exec_command(f"vnstat -i {default_interface} --oneline 2>/dev/null | cut -d';' -f4")
+                daily_bandwidth = bandwidth.strip() if bandwidth.strip() else "vnstat not available"
+            else:
+                daily_bandwidth = "no default interface"
+        except:
+            daily_bandwidth = "vnstat not available"
 
-        # Check memory usage
-        mem_output = ssh_server.exec_command("free -h | grep '^Mem:'")
-        mem_info = mem_output.strip().split()
+        # Check systemd service status
+        try:
+            service_status = ssh_server.exec_command("systemctl is-active shadowsocks-libev").strip()
+        except:
+            service_status = "service not found"
 
-        status_message = "🟢 Server Status:\n\n"
-        status_message += f"⏱️ Load Average: {', '.join(load_line)}\n"
-        status_message += f"💾 Disk Usage: {disk_usage[4]} used ({disk_usage[3]} free)\n"
-        status_message += f"🧠 Memory: {mem_info[2]}/{mem_info[1]} used\n"
-        status_message += "\n✅ Server is operational"
+        # Check configuration file presence
+        try:
+            config_check = ssh_server.exec_command("test -f /etc/shadowsocks-libev/config.json && echo 'present' || echo 'missing'")
+            config_status = config_check.strip()
+        except:
+            config_status = "check failed"
+
+        status_message = f"""🟢 Server Status:
+📊 Daily bandwidth: {daily_bandwidth}
+⚙️ Service status: {service_status}
+📄 Config file: {config_status}
+"""
 
         await update.message.reply_text(status_message)
 
