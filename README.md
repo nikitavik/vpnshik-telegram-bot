@@ -36,6 +36,7 @@ A Telegram bot for monitoring and managing VPN servers via SSH connection.
    SERVER_USERNAME=your_ssh_username
    SERVER_PASSWORD=your_ssh_password
    LOG_LEVEL=INFO
+   ALLOWED_USERS=123456789,987654321
    ```
 
 ## Configuration
@@ -47,6 +48,7 @@ A Telegram bot for monitoring and managing VPN servers via SSH connection.
 - `SERVER_USERNAME` (optional): SSH username (defaults to 'root')
 - `SERVER_PASSWORD` (required): SSH password for authentication
 - `LOG_LEVEL` (optional): Logging level (defaults to 'INFO')
+- `ALLOWED_USERS` (optional): Comma-separated list of allowed Telegram user IDs (leave empty for no restrictions)
 
 ## Running the Bot
 

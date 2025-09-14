@@ -1,34 +1,19 @@
-import os
 import logging
 import signal
 import sys
 
-from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 
 from handlers import get_id, report_status
 from services.ssh_server import SSHServer
-
-# Load environment variables
-load_dotenv('.env')
-
-# Configuration with defaults
-BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
-SERVER_IP = os.getenv('SERVER_IP')
-SERVER_USERNAME = os.getenv('SERVER_USERNAME', 'root')
-SERVER_PASSWORD = os.getenv('SERVER_PASSWORD')
+from infrastructure.config import BOT_TOKEN, LOG_LEVEL, SERVER_IP, SERVER_USERNAME, SERVER_PASSWORD
 
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=getattr(logging, LOG_LEVEL.upper(), logging.INFO)
 )
-
-# Validate required environment variables
-if not BOT_TOKEN:
-    raise ValueError("TELEGRAM_BOT_TOKEN environment variable is required")
 
 # Global SSH server instance for cleanup
 ssh_server_instance = None
@@ -83,6 +68,7 @@ def main():
         # Continue without SSH functionality for now
 
     # on different commands - answer in Telegram
+   
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("status", lambda update, context: report_status(update, context, ssh_server_instance)))

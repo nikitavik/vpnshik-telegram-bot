@@ -1,7 +1,10 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from .restricted_handler import restricted
 
+
+@restricted
 async def report_status(update: Update, context: ContextTypes.DEFAULT_TYPE, ssh_server=None):
     """
     Check server status via SSH connection.
