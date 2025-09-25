@@ -1,9 +1,13 @@
 import os
+from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv('.env')
+# Use pathlib to construct path relative to project root
+project_root = Path(__file__).parent.parent.parent
+env_path = project_root / '.env'
+load_dotenv(env_path)
 
 # Bot Configuration
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
