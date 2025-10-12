@@ -37,7 +37,6 @@ A Telegram bot for monitoring and managing VPN servers via SSH connection.
    SERVER_PASSWORD=your_ssh_password
    LOG_LEVEL=INFO
    ALLOWED_USERS=123456789,987654321
-   ```
 
 ## Configuration
 
@@ -51,6 +50,15 @@ A Telegram bot for monitoring and managing VPN servers via SSH connection.
 - `ALLOWED_USERS` (optional): Comma-separated list of allowed Telegram user IDs (leave empty for no restrictions)
 
 ## Running the Bot
+
+### Development (Polling Mode)
+For local development and testing, run the bot in polling mode:
+
+```bash
+python src/bot.py
+```
+
+The bot will continuously poll Telegram's servers for new messages.
 
 ```bash
 python src/bot.py

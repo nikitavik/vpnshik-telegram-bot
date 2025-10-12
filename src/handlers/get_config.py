@@ -1,10 +1,7 @@
-import json
-import base64
-import qrcode
-from io import BytesIO
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from services.qr_generation import get_qr
 from .restricted_handler import restricted
 
 
@@ -20,51 +17,18 @@ async def get_config(update: Update, context: ContextTypes.DEFAULT_TYPE, ssh_ser
     try:
         # Read shadowsocks config from server
         config_json = ssh_server.exec_command("cat /etc/shadowsocks/shadowsocks.json")
-        config = json.loads(config_json)
-        print(config)
 
-        # Extract required fields
-        server = config.get('server', ssh_server.ip)
-        server_port = config.get('server_port', 8388)
-        password = config.get('password', '')
-        method = config.get('method', 'aes-256-gcm')
-
-        if not password:
-            await update.message.reply_text("❌ Password not found in server config")
-            return
-
-        # Create shadowsocks URI format: ss://method:password@server:port
-        # Base64 encode the method:password part
-        user_info = f"{method}:{password}"
-        user_info_b64 = base64.urlsafe_b64encode(user_info.encode()).decode().rstrip('=')
-
-        ss_uri = f"ss://{user_info_b64}@{server}:{server_port}"
-
-        # Generate QR code
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(ss_uri)
-        qr.make(fit=True)
-
-        # Create QR code image
-        img = qr.make_image(fill_color="black", back_color="white")
-
-        # Save to BytesIO buffer
-        buffer = BytesIO()
-        img.save(buffer, format='PNG')
-        buffer.seek(0)
+        # Generate QR code using the service
+        qr_buffer, ss_uri = get_qr(config_json, ssh_server.ip)
 
         # Send QR code as photo
         await update.message.reply_photo(
-            photo=buffer,
+            photo=qr_buffer,
             caption="📱 Scan this QR code in Potatso app to import Shadowsocks VPN config"
         )
+        await update.message.reply_text(f"📱 Shadowsocks URI: ||{ss_uri}||")
 
-    except json.JSONDecodeError:
-        await update.message.reply_text("❌ Failed to parse server config JSON")
+    except ValueError as e:
+        await update.message.reply_text(f"❌ Configuration error: {str(e)}")
     except Exception as e:
         await update.message.reply_text(f"❌ Error generating config QR code: {str(e)}")
