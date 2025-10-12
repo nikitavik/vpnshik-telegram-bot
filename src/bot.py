@@ -11,7 +11,7 @@ from telegram.ext import (
     filters,
 )
 
-from handlers import get_id, report_status, get_config
+from handlers import get_id, report_status, get_config, allow
 from services.ssh_server import SSHServer
 from infrastructure.config import (
     BOT_TOKEN,
@@ -74,6 +74,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         /help - Show this help
         /status - Check server status
         /config - Get VPN config as QR code
+        /allow <password> - Grant yourself access
     """
     await update.message.reply_text(help_text)
 
@@ -123,6 +124,7 @@ def main():
     )
 
     application.add_handler(CommandHandler("id", get_id))
+    application.add_handler(CommandHandler("allow", allow))
     # on non command i.e message - echo the message on Telegram
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
