@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  vpn-bot:
+    build: .
+    container_name: vpn-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Mount users.json for persistence
+      - ./users.json:/app/users.json
+    networks:
+      - vpn-bot-network
+
+networks:
+  vpn-bot-network:
+    driver: bridge

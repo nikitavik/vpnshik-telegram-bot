@@ -64,6 +64,55 @@ The bot will continuously poll Telegram's servers for new messages.
 python src/bot.py
 ```
 
+### Docker Deployment (Recommended for Production)
+
+For production deployment, use Docker for easy scaling and management:
+
+#### Quick Start with Docker Compose
+
+1. **Create environment file**:
+   ```bash
+   cp .env.example .env  # Copy example file
+   nano .env             # Edit with your values
+   ```
+
+3. **Deploy with Docker Compose**:
+   ```bash
+   # Build and start the container
+   docker-compose up -d
+
+   # View logs
+   docker-compose logs -f vpn-bot
+
+   # Stop the bot
+   docker-compose down
+   ```
+
+#### Manual Docker Commands
+
+```bash
+# Build the image
+docker build -t vpn-bot .
+
+# Run the container
+docker run -d --name vpn-bot \
+  --restart unless-stopped \
+  -v $(pwd)/users.json:/app/users.json \
+  --env-file .env \
+  vpn-bot
+
+# View logs
+docker logs -f vpn-bot
+
+# Stop and remove
+docker stop vpn-bot && docker rm vpn-bot
+```
+
+#### Docker Volume Mappings
+
+- `users.json`: Stores allowed users (read-write)
+- `.env`: Environment variables (passed via `--env-file`)
+
 ## Available Commands
 
 - `/start` - Welcome message and bot introduction
