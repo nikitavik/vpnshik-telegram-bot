@@ -1,5 +1,6 @@
 import paramiko
 
+
 class SSHServer:
     def __init__(self, ip, username, password=None, key_filename=None):
         self.ip = ip
@@ -19,15 +20,12 @@ class SSHServer:
 
         try:
             connect_kwargs = {
-                'hostname': self.ip,
-                'username': self.username,
+                "hostname": self.ip,
+                "username": self.username,
             }
 
-            # if self.password:
-                # connect_kwargs['password'] = self.password
-            # elif self.key_filename:
-                # connect_kwargs['key_filename'] = self.key_filename
-                # raise ValueError("Either password or key_filename must be provided")
+            if self.password:
+                connect_kwargs["password"] = self.password
 
             self.ssh.connect(**connect_kwargs)
             self.connected = True
@@ -45,8 +43,8 @@ class SSHServer:
 
         try:
             stdin, stdout, stderr = self.ssh.exec_command(command)
-            output = stdout.read().decode('utf-8')
-            error = stderr.read().decode('utf-8')
+            output = stdout.read().decode("utf-8")
+            error = stderr.read().decode("utf-8")
 
             if error:
                 raise ValueError(f"Command failed: {error}")
